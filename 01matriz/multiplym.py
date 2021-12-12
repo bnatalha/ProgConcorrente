@@ -55,6 +55,31 @@ def multiplySeq(A,B,n):
     
     return C
 
+def multiplyCon(A,B,n):
+
+    def calcCell(A,B,C,n):
+        soma = 0
+        for k in range(0,n):
+            soma = soma + A[i][k] * B[k][j]
+        # TODO solve data racing condition
+        if i not in C:
+            C[i] = {j: soma}
+        if i in C:
+            C[i].update({j: soma})
+
+    C = {}  # result
+    threads = []
+    for i in range(0,n):
+        for j in range(0,n):
+            t = Thread(target=calcCell, args=(A, B, C, n,))
+            threads.append(t)
+            t.start()
+            
+    for t in threads:
+        t.join()
+
+    return C
+
 print(multiplySeq(matrix_A,matrix_B,2))
 #print(multiplySeq(readMatrix("A4x4"), readMatrix("B4x4"), 4))               
 # print(readMatrix("B4x4"))
