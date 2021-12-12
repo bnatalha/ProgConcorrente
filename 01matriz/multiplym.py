@@ -15,13 +15,33 @@ matrix_A = {
 }
 
 matrix_B = {
-    0: {0: 5,
-        1: 6},
-    1: {0: 7,
-        1: 8},
+    0: {0: -1,
+        1: 3},
+    1: {0: 4,
+        1: 2},
 }
 
-def multiply(A,B,n):
+def readMatrix(filename):
+    matrix = {}
+    with open("in/"+ filename + ".txt", 'r') as f:
+        dims =[int(num) for num in f.readline().rstrip('\n').strip().split(' ')]
+        # tratar exceções caso não tenha isto
+        if (len(dims) != 2):
+            raise Exception("The first line must have exactly 2 numbers (the dimensions of the matrix")
+        
+        for i in range(0, dims[0]):
+            line = f.readline().strip().rstrip('\n').split(' ')
+            # print(line) #DEBUG
+            for j in range(0, len(line)): # ou dims[-1]
+                val = int(line[j].strip())
+                if i not in matrix:
+                   matrix[i] = {j: val}
+                if i in matrix:
+                   matrix[i].update({j: val})
+    return matrix
+    # print(matrix) #DEBUG
+
+def multiplySeq(A,B,n):
     C = {}
     for i in range(0,n):
         for j in range(0,n):
@@ -35,6 +55,7 @@ def multiply(A,B,n):
     
     return C
 
-print(multiply(matrix_A, matrix_B, 2))               
-
+print(multiplySeq(matrix_A,matrix_B,2))
+#print(multiplySeq(readMatrix("A4x4"), readMatrix("B4x4"), 4))               
+# print(readMatrix("B4x4"))
 
