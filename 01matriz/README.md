@@ -4,6 +4,7 @@ TODO:
 - algoritmo sequencial
 - algoritmo concorrente
 - leitura de arquivos de entrada
+- testes
 - formato e produção dos arquivos de saída
 - tratamento de argumento na entrada do programa
   - Todas as matrizes utilizadas como casos de teste para este
