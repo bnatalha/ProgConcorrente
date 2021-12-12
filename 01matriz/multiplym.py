@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Lock
 from time import sleep
 
 # TODO: usar mapa ou lista?
@@ -57,21 +57,24 @@ def multiplySeq(A,B,n):
 
 def multiplyCon(A,B,n):
 
-    def calcCell(A,B,C,n):
+    def calcCell(A,B,C,n,lock):
         soma = 0
         for k in range(0,n):
             soma = soma + A[i][k] * B[k][j]
         # TODO solve data racing condition
+        lock.acquire()
         if i not in C:
             C[i] = {j: soma}
         if i in C:
             C[i].update({j: soma})
+        lock.release()
 
     C = {}  # result
     threads = []
+    lock = Lock()
     for i in range(0,n):
         for j in range(0,n):
-            t = Thread(target=calcCell, args=(A, B, C, n,))
+            t = Thread(target=calcCell, args=(A, B, C, n,lock))
             threads.append(t)
             t.start()
             
@@ -80,7 +83,7 @@ def multiplyCon(A,B,n):
 
     return C
 
-print(multiplySeq(matrix_A,matrix_B,2))
-#print(multiplySeq(readMatrix("A4x4"), readMatrix("B4x4"), 4))               
+#print(multiplySeq(matrix_A,matrix_B,2))
+print(multiplySeq(readMatrix("A4x4"), readMatrix("B4x4"), 4))               
 # print(readMatrix("B4x4"))
 
