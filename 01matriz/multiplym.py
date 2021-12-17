@@ -41,40 +41,29 @@ def readMatrix(filename):
     return matrix
     # print(matrix) #DEBUG
 
+def calcCell(A,B,C,i,j,n):
+    soma = 0
+    for k in range(0,n):
+        soma = soma + A[i][k] * B[k][j]
+    C[i][j] = soma
+
 def multiplySeq(A,B,n):
     C = {}
     for i in range(0,n):
+        C[i] = {} # prefill matrix dictionaries
         for j in range(0,n):
-            soma = 0
-            for k in range(0,n):
-                soma = soma + A[i][k] * B[k][j]
-            if i not in C:
-                C[i] = {j: soma}
-            if i in C:
-                C[i].update({j: soma})
+            calcCell(A,B,C,i,j,n)
     
     return C
 
 def multiplyCon(A,B,n):
-
-    def calcCell(A,B,C,n,lock):
-        soma = 0
-        for k in range(0,n):
-            soma = soma + A[i][k] * B[k][j]
-        # TODO solve data racing condition
-        lock.acquire()
-        if i not in C:
-            C[i] = {j: soma}
-        if i in C:
-            C[i].update({j: soma})
-        lock.release()
-
     C = {}  # result
     threads = []
-    lock = Lock()
+
     for i in range(0,n):
+        C[i] = {} # prefill matrix dictionaries
         for j in range(0,n):
-            t = Thread(target=calcCell, args=(A, B, C, n,lock))
+            t = Thread(target=calcCell, args=(A, B, C, i,j,n))
             threads.append(t)
             t.start()
             
