@@ -36,8 +36,8 @@ def get_sequential_and_concurrent(dimension):
     A = readMatrix(inputFilename("A",n)) 
     B = readMatrix(inputFilename("B",n)) 
     
-    c1 = multiplySeq(A, B, dimension)
-    c2 = multiplyCon(A, B, dimension)
+    c1 = sequential_multiplication(A, B, dimension)
+    c2 = concurrent_multiplication(A, B, dimension)
 
     # printMatrix(c1)
     # printMatrix(c2)
@@ -47,11 +47,11 @@ def get_sequential_and_concurrent(dimension):
 class MatrixMultiplicationTest(unittest.TestCase):
     
     def test_multiply_case_1_sequential(self):
-        r = multiplySeq(CASE_1["A"], CASE_1["B"], 2)
+        r = sequential_multiplication(CASE_1["A"], CASE_1["B"], 2)
         self.assertEqual(CASE_1["C"], r)
 
     def test_multiply_case_1_concurrent(self):
-        r = multiplyCon(CASE_1["A"], CASE_1["B"], 2)
+        r = concurrent_multiplication(CASE_1["A"], CASE_1["B"], 2)
         self.assertEqual(CASE_1["C"], r)
 
     def test_should_get_same_result_4x4(self):
