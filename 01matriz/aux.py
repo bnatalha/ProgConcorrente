@@ -60,8 +60,8 @@ def parseArgs():
 import os
 import errno
 
-def writeMatrix(C, n):
-    filename = f'out/C{n}x{n}.txt'
+def writeMatrix(C, n, mode):
+    filename = f'out/{mode}{n}x{n}.txt'
 
     if not os.path.exists(os.path.dirname(filename)):
         try:
@@ -85,13 +85,19 @@ def timing(f):
     """ Timing wrapper """      
     @wraps(f)
     def wrap(*args, **kw):
+        """ Returns a tuple with the resultant matrix, the total elapsed time
+            and metainfo
+        """      
+        # start the clock
         ts = time()
-        C = f(*args, **kw)
+        result = f(*args, **kw)
         te = time()
-        n = args[2]
-        print('func:%r dimension:%r took: %2.4f sec' % \
-          (f.__name__, n, te-ts))
+        # finish the clock
+        total_time = te-ts
 
+        meta_info = 'func:%r dimension:%r took: %2.4f sec' % \
+            (f.__name__, args[2], total_time)
+        
 
-        return result
+        return (result, total_time, meta_info)
     return wrap

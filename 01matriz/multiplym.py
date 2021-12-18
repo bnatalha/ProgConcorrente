@@ -65,9 +65,9 @@ def run(_dimension, _type):
     # multiply using one of the strategies
     selectAlg = lambda t : (sequential_multiplication if _type == 'S' else concurrent_multiplication)
     multiply = timing(selectAlg(_type))
-    result = multiply(matrix_a, matrix_b, _dimension)
-    writeMatrix(result, _dimension)
-    return result
+    result, elapsed_time, meta_info = multiply(matrix_a, matrix_b, _dimension)
+    writeMatrix(result, _dimension, _type)
+    return result, elapsed_time
 
 
 
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     try :
         params = parseArgs()
         if len(params) == 2:
-            result = run(*params)
+            result, elapsed_time = run(*params)
+            print('%2.4f' % (elapsed_time))
     except Exception as err:
         print(f'Error: {err}')
