@@ -11,13 +11,14 @@
 - Saída:
   - [x] Formato e produção dos arquivos de saída `Cixi.txt`
   - [x] Testes
-  - [ ] **clockar** os tempos e registrar em um arquivo de saída (.csv?) (barra de progresso?)
+  - [x] **clockar** os tempos
 - [x] Parâmetros do executável:
   -  `$ <programa> i S`  
     - i: inteiro potencia de 2
     - S | C : Sequencial on Conconrente
 - Experimentação:
-  - [ ] registrar tempo máximo, mínimo e médio dos tempos nas `20` e desvio padrão.
+  - [ ] registrar tempos em um arquivo de saída (.csv?) (barra de progresso?)
+    - registrar tempo máximo, mínimo e médio dos tempos nas `20` e desvio padrão.
   - [ ] criar script para automatizaros testes;
   - [ ] rodar script;
   - [ ] Calcular o Speedup (T_seq / T_co)
