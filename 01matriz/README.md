@@ -2,27 +2,25 @@
 
 ### Programa
 
-- Decidir a linguagem: Python
+- [x] Decidir a linguagem: Python
 - Algoritmos:
-  - sequencial
-  - concorrente
+  - [x] sequencial
+  - [x] concorrente
 - Entrada:
-  - leitura de arquivos de entrada
-    - `Aixi.txt` ou `Bixi.txt`
+  - [x] leitura de arquivos de entrada `Aixi.txt` ou `Bixi.txt`
 - Saída:
-  - Formato e produção dos arquivos de saída `Cixi.txt`
-  - Testes
-  - **clockar** os tempos e registrar em um arquivo de saída (.csv?)
-    - barra de progresso?
-- Parâmetros do executável:
-  - `$ <programa> i S`  
+  - [x] Formato e produção dos arquivos de saída `Cixi.txt`
+  - [x] Testes
+  - [ ] **clockar** os tempos e registrar em um arquivo de saída (.csv?) (barra de progresso?)
+- [x] Parâmetros do executável:
+  -  `$ <programa> i S`  
     - i: inteiro potencia de 2
     - S | C : Sequencial on Conconrente
 - Experimentação:
-  - registrar tempo máximo, mínimo e médio dos tempos nas `20` e desvio padrão.
-  - criar script para automatizaros testes;
-  - rodar script;
-  - Calcular o Speedup (T_seq / T_co)
+  - [ ] registrar tempo máximo, mínimo e médio dos tempos nas `20` e desvio padrão.
+  - [ ] criar script para automatizaros testes;
+  - [ ] rodar script;
+  - [ ] Calcular o Speedup (T_seq / T_co)
 
 ---
 
