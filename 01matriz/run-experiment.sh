@@ -11,8 +11,8 @@ exec_program(){
 
 for mode in 'S' 'C'
 do 
-    # for dimension in 4 8 16 32 64 128 256 1024 2048
-    for dimension in 8
+    for dimension in 4 8 16 32 64 128 256 1024 2048
+    # for dimension in 8
     do
         output="out/metrics/${mode}${dimension}_times.txt"
         echo $(date) >> $output
@@ -25,10 +25,3 @@ do
         done
     done
 done
-
-
-
-# for [m in ['S', 'C']]
-#     for [n in [2, 8, 16, 32 .. 2048]] :
-#         for [i -in 0..20] :
-#             exec_program(NOME_DO_PROGRAMA, n, m)
