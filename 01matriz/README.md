@@ -2,7 +2,7 @@
 
 ### Programa
 
-- Decidir a linguagem
+- Decidir a linguagem: Python
 - Algoritmos:
   - sequencial
   - concorrente
@@ -13,6 +13,7 @@
   - Formato e produção dos arquivos de saída `Cixi.txt`
   - Testes
   - **clockar** os tempos e registrar em um arquivo de saída (.csv?)
+    - barra de progresso?
 - Parâmetros do executável:
   - `$ <programa> i S`  
     - i: inteiro potencia de 2
