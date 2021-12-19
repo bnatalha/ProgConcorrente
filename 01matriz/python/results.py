@@ -1,6 +1,5 @@
 # %%
-import matplotlib.pyplot as plt
-from numpy import sqrt 
+import matplotlib.pyplot as plt 
 from statistics import stdev
 
 _VALORES = 1
@@ -41,29 +40,43 @@ def lerResultados():
                 resultados[modo][dim][_MAX] = max(resultados[modo][dim][_VALORES])
                 resultados[modo][dim][_MIN] = min(resultados[modo][dim][_VALORES])
                 
-# def pltGraficos():
-#     for dim in dimensoes:
-#         mediaConcorrente = resultados['C'][dim][_MEDIA]
-#         mediaSequencial = resultados['S'][dim][_MEDIA]
+def pltGraficos():
+    for dim in dimensoes:
+        mediaConcorrente = resultados['C'][dim][_MEDIA]
+        mediaSequencial = resultados['S'][dim][_MEDIA]
         
-#         grupos = ['Sequencial', 'Concorrente']
-#         valores = [mediaSequencial, mediaConcorrente]
-#         plt.bar(grupos, valores)
-#         plt.show()
+        grupos = ['Sequencial', 'Concorrente']
+        valores = [mediaSequencial, mediaConcorrente]
+        plt.ylabel('Tempo médio de execução')
+        plt.xlabel("Dimensão " + dim + "x" + dim)
+        plt.bar(grupos, valores)
+        plt.show()
                 
                 
 lerResultados()
 
 print(resultados['C']['128'])
 
-#pltGraficos()
+pltGraficos()
 
 speedups = {}
 def calcularSpeedup():
+    dimensoes = ["4", "8", "16", "32", "64", "128", "256", "1024", "2048"]
+    speedupsResultados = []
     for dim in dimensoes:
         mediaConcorrente = resultados['C'][dim][_MEDIA]
         mediaSequencial = resultados['S'][dim][_MEDIA]            
         speedups[dim] = mediaSequencial/mediaConcorrente
+        speedupsResultados.append(speedups[dim])
+        
+    plt.plot(dimensoes, speedupsResultados, '-bo')
+    plt.ylabel('Resultado speedup')
+    plt.title('Speedup x Dimensão')
+    plt.xlabel("Dimensão")
+    plt.show()
+        
+        
+        
         
 calcularSpeedup()
 
