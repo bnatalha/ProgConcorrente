@@ -1,4 +1,6 @@
-from threading import Thread, Lock
+#!/usr/bin/env python3
+
+from threading import Thread
 from utils import *
 
 def calculate_cell(A,B,C,i,j,n):

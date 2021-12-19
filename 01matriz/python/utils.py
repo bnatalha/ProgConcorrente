@@ -40,12 +40,16 @@ def parseArgs():
     alg_type = ""
 
     if len(args) != 2:
-        error = "wrong program usage"
+        error = "wrong program usage, try this instead:" \
+          '\n multiplym N S'  \
+          '\n\tN: dimenssions of the matrix' \
+          '\n\tS | C : (S)equencial or (C)oncurrent'
+             
     else: 
         dimensions = int(args[0])
         alg_type = args[1]
         if dimensions < 4 or 2048 < dimensions or (not isPowerOfTwo(dimensions)):
-            error = 'the matrix dimensions (n x n) needs to be a power of 2, with 4 < n <= 2048' \
+            error = 'the matrix dimensions (n x n) needs to be a power of 2, with 4 <= n <= 2048' \
                 f'\nrecieved: {dimensions}'
             
         elif alg_type not in ['S', 'C']:
