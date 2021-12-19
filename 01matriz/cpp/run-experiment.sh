@@ -9,15 +9,15 @@ exec_program(){
     ./$PROGRAM_NAME $dimension $exec_mode
 }
 
-for mode in 'S' 'C'
+for dimension in 4 8 16 32 64 128 256 1024 2048
+# for dimension in 8
 do 
-    for dimension in 8
-    # for dimension in 4 8 16 32 64 128 256 1024 2048
+    for mode in 'S' 'C'
     do
         output="out/metrics/${mode}${dimension}_times.txt"
         echo $(date) >> $output
-        # for reps in {1..20}
         for reps in 1
+        # for reps in {1..20}
         do
             timing=$(exec_program $dimension $mode)
             echo "[$reps/$MAX_REPS] $mode $dimension $timing"
