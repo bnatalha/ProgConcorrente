@@ -4,7 +4,7 @@ def printMatrix(M):
     for i in M.keys():
         print(M[i])
 
-inputFilename = lambda prefix, n : f'in/{prefix}{n}x{n}.txt'
+inputFilename = lambda prefix, n : f'../in/{prefix}{n}x{n}.txt'
 
 def readMatrix(filename):
     matrix = {}

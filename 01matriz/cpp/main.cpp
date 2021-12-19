@@ -37,7 +37,32 @@ struct matrix {
         }
     }
 
-    static matrix readFrom(string filepath) {
+    void write(const string mode) {
+        try {
+            string filepath = "out/" + mode + to_string(size) + "x" + to_string(size) + ".txt";  
+            ofstream file(filepath);
+            if (file.is_open()) {
+                file << size << " " << size << "\n";
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        file << *data[i*size+j];
+                        if(j + 1 < size) {
+                            file << " ";
+                        }
+                    }
+                    file << "\n";
+                }
+            } else {
+                throw invalid_argument("Não conseguiu abrir o arquivo: " + filepath);
+        
+            }
+        } catch(const std::exception& e) {
+            cerr << e.what();
+        }
+            
+    }
+
+    static matrix read_from(string filepath) {
             matrix M = matrix();
             try {
                 ifstream file(filepath);
@@ -76,6 +101,21 @@ void calculate_cell(
     C.data[i*n+j] = make_shared<int>(sum);
 }
 
+shared_ptr<matrix> sequential_multiplication(shared_ptr<matrix> A, shared_ptr<matrix> B) {
+    int _size = A->size;
+    shared_ptr<matrix> C = make_shared<matrix>();
+
+    C->data = vector<shared_ptr<int>>(_size * _size);
+    C->size = _size;
+    for(int i = 0; i < _size; i++) {
+        for(int j = 0; j < _size; j++) {
+            calculate_cell(*A, *B, *C, i, j, _size);
+        }
+    }
+
+    return C;
+}
+
 shared_ptr<matrix> concurrent_multiplication(shared_ptr<matrix> A, shared_ptr<matrix> B) {
     int _size = A->size;
     shared_ptr<matrix> C = make_shared<matrix>();
@@ -99,30 +139,15 @@ shared_ptr<matrix> concurrent_multiplication(shared_ptr<matrix> A, shared_ptr<ma
     return C;
 }
 
-void time_it() {
-    auto start = high_resolution_clock::now(); 
-
-    shared_ptr<matrix> A, B, C;
-    A = make_shared<matrix>(matrix::readFrom("../in/A8x8.txt"));
-    B = make_shared<matrix>(matrix::readFrom("../in/B8x8.txt"));
-    // clocking
-    C = concurrent_multiplication(A,B);
-    matrix::print(*C);
-    // clocking
-
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(stop - start);
-    cout << duration.count() << endl;
-}
-
-const string dims_arg_error("the matrix dimensions (n x n) needs to be a power of 2, with 4 < n <= 2048\n");
-
+const std::invalid_argument dims_arg_except("the matrix dimensions (n x n) needs to be a power of 2, with 4 < n <= 2048\n");
+const std::invalid_argument mode_arg_except("enter the algorithm that wil run (\"C\" for concurrent and \"S\" for sequential)\n");
 
 struct experiment_meta {
     size_t dimension;
-    char mode;
+    string mode;
+    long time_elapsed; // milliseconds
 
-    experiment_meta(size_t d, char m) : dimension{d}, mode{m} {};
+    experiment_meta(size_t d, string m) : dimension{d}, mode{m}, time_elapsed{-27} {};
     experiment_meta(){}
 
 };
@@ -140,20 +165,20 @@ experiment_meta parse_args(int argc, char *argv[]) {
             string s_dims = argv[1];
             int dims = stoi(s_dims);
             if(dims < 4 || 2048 < dims || (!is_power_of_two(dims)) ) {
-                throw std::invalid_argument(dims_arg_error);
+                throw dims_arg_except;
             }
 
             string mode(argv[2]);
             if(mode.compare("S") != 0 & mode.compare("C") != 0) {
-                throw std::invalid_argument("enter the algorithm that wil run (\"C\" for concurrent and \"S\" for sequential)\n");
+                throw mode_arg_except;
             }
 
-            metainfo = experiment_meta(dims, char(mode[0]));
+            metainfo = experiment_meta(dims, mode);
 
         }
     } catch (std::exception& e) {
         if (string("stoi").compare(e.what()) == 0) {
-            throw std::invalid_argument(dims_arg_error);
+            throw dims_arg_except;
         } else {
             throw;
         }
@@ -162,11 +187,47 @@ experiment_meta parse_args(int argc, char *argv[]) {
     return metainfo;
 }
 
+void run(experiment_meta& meta) {
+    auto input_filename = [](string prefix, int n) { 
+        string d = to_string(n);
+        return string("../in/" + prefix + d + "x" + d + ".txt"); };
+    
+    // build filenames
+    string matrix_a_path(input_filename("A", meta.dimension));
+    string matrix_b_path(input_filename("B", meta.dimension));
+
+    // read the matrixes
+    shared_ptr<matrix> A, B, C;
+    A = make_shared<matrix>(matrix::read_from(matrix_a_path));
+    B = make_shared<matrix>(matrix::read_from(matrix_b_path));
+
+    // select multiplication alg
+    shared_ptr<matrix> (*multiplication)(shared_ptr<matrix>, shared_ptr<matrix>);
+    if ((meta.mode).compare("C") == 0) {
+        multiplication = &concurrent_multiplication;
+    } else { // mode == 'S'
+        multiplication = &sequential_multiplication;
+    }
+
+    // clock the experiment
+    auto start = high_resolution_clock::now(); 
+    // clocking
+    C = multiplication(A,B);
+    // clocking
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    
+    meta.time_elapsed = duration.count();
+    // write matrix c;
+    C->write(meta.mode);
+}
+
 int main(int argc, char *argv[]) {
 
     try {
-        experiment_meta metainfo = parse_args(argc, argv);
-        cout << metainfo.dimension << " " << metainfo.mode << "\n";
+        experiment_meta meta = parse_args(argc, argv);
+        run(meta);
+        cout << meta.time_elapsed / 1000.f << "\n";
     } catch (std::exception& e) {
         cerr << e.what();
     }
