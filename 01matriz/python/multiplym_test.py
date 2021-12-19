@@ -1,7 +1,7 @@
 import unittest
 
 from multiplym import *
-from aux import readMatrix
+from utils import readMatrix
 
 
 """

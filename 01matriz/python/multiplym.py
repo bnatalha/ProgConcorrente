@@ -1,5 +1,5 @@
 from threading import Thread, Lock
-from aux import *
+from utils import *
 
 def calculate_cell(A,B,C,i,j,n):
     """ Calculates the value of the of the cell C[i][j] where
