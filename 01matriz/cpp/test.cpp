@@ -26,7 +26,6 @@ struct matrix {
     }
 
     static void print(matrix& m) {
-        cout << "here";
         for ( int i = 0; i < m.size; ++i) {
             cout << "[ ";
             for (int j = 0; j < m.size; ++j) {
@@ -66,21 +65,18 @@ struct matrix {
 // typedef shared_ptr<matrix> matrix_ptr;
 
 void calculate_cell(
-    matrix& A, matrix& C,
-    // matrix& A, matrix& B, matrix& C,
+    matrix& A, matrix& B, matrix& C,
     const int i, const int j,
     const size_t n)
 {
-
-    int sum = 6;
-    // for (int k = 0; k < n; k++) {
-    //     sum = sum + (*A.data[i*n+k]) * (*B.data[k*n+j]);
-    // }
+    int sum = 0;
+    for (int k = 0; k < n; k++) {
+        sum = sum + (*A.data[i*n+k]) * (*B.data[k*n+j]);
+    }
     C.data[i*n+j] = make_shared<int>(sum);
-    cout << *C.data[i*n+j];
 }
 
-shared_ptr<matrix> concurrent_multiplication(matrix& A, size_t _size) {
+shared_ptr<matrix> concurrent_multiplication(shared_ptr<matrix> A, shared_ptr<matrix> B, size_t _size) {
     shared_ptr<matrix> C = make_shared<matrix>();
 
     vector<thread> threads = vector<thread>(_size * _size);
@@ -89,9 +85,7 @@ shared_ptr<matrix> concurrent_multiplication(matrix& A, size_t _size) {
     C->size = _size;
     for(int i = 0; i < _size; i++) {
         for(int j = 0; j < _size; j++) {
-            // thread th(ref(calculate_cell), 
-                        // ref(A), ref(B), ref(i), ref(j), ref(_size));
-            thread th(ref(calculate_cell), ref(A), ref(*C), i, j, _size);
+            thread th(ref(calculate_cell), ref(*A), ref(*B), ref(*C), i, j, _size);
             threads.push_back(move(th));
         }
     }
@@ -101,24 +95,17 @@ shared_ptr<matrix> concurrent_multiplication(matrix& A, size_t _size) {
             th.join();
     }
 
-    matrix::print(*C);
-
     return C;
 }
 
 
 int main() {
 
-    // shared_ptr<matrix> A, B, C;
-    shared_ptr<matrix> C;
-    matrix A;
-    A = matrix::readFrom("../ref/A2x2.txt");
-    // A = make_shared<matrix>(matrix::readFrom("../ref/A2x2.txt"));
-    // B = make_shared<matrix>(matrix::readFrom("../ref/A2x2.txt"));
-    C = concurrent_multiplication(A,2);
+    shared_ptr<matrix> A, B, C;
+    A = make_shared<matrix>(matrix::readFrom("../ref/A2x2.txt"));
+    B = make_shared<matrix>(matrix::readFrom("../ref/B2x2.txt"));
+    C = concurrent_multiplication(A,B,2);
     matrix::print(*C);
-    // C = concurrent_multiplication(A,B,2);
-    // thread t(ref(concurrent_multiplication), ref(A));
 
     return 0;
 }
