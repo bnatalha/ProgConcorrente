@@ -40,7 +40,7 @@ def lerResultados():
                 resultados[modo][dim][_MAX] = max(resultados[modo][dim][_VALORES])
                 resultados[modo][dim][_MIN] = min(resultados[modo][dim][_VALORES])
                 
-def pltGraficos():
+def pltGraficosTp():
     for dim in dimensoes:
         mediaConcorrente = resultados['C'][dim][_MEDIA]
         mediaSequencial = resultados['S'][dim][_MEDIA]
@@ -57,7 +57,7 @@ lerResultados()
 
 print(resultados['C']['128'])
 
-pltGraficos()
+pltGraficosTp()
 
 speedups = {}
 def calcularSpeedup():
@@ -74,13 +74,11 @@ def calcularSpeedup():
     plt.title('Speedup x Dimensão')
     plt.xlabel("Dimensão")
     plt.show()
-        
-        
+
         
         
 calcularSpeedup()
 
-# #grafico 
         
 
 
