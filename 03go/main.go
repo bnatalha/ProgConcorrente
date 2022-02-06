@@ -55,6 +55,11 @@ func prepararEquipes(args []string) {
 func correr(id_corredor, id_equipe int, raia, chegada chan Corredor) {
 	// espera o bastão chegar para começar a correr
 	ultimo_corredor := <-raia
+	if ultimo_corredor.id == 0 {
+		fmt.Println("Corredor", id_corredor, "da equipe", id_equipe, "largou.")
+	} else {
+		fmt.Println("Corredor", id_corredor, "da equipe", id_equipe, "pegou bastão do corredor", ultimo_corredor.id)
+	}
 
 	// calcular tempo que será gasto na corrida
 	seed := rand.NewSource(time.Now().UnixNano())
