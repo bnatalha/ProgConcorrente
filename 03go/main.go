@@ -3,21 +3,19 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
+// estrutura para guardar as informações de um corredor
 type corredor struct {
 	duracao time.Duration
 	id      int
 	time    int
 }
 
-var groupCorrida sync.WaitGroup
+const MAX_CORREDORES = 4
 
-const CORREDORES = 4
-
-func run(id_corredor, id_time int, pista chan corredor, chegada chan int) {
+func run(id_corredor, id_time int, raia chan corredor, chegada chan int) {
 	// tempo percorrido
 	seed := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(seed)
@@ -27,27 +25,30 @@ func run(id_corredor, id_time int, pista chan corredor, chegada chan int) {
 	time.Sleep(duracao)
 	fmt.Print("Corredor ", id_corredor, " do time ", id_time, " correu por ", duracao)
 
-	pista <- corredor{duracao: duracao, id: id_corredor, time: id_time}
+	raia <- corredor{duracao: duracao, id: id_corredor, time: id_time}
 
-	if CORREDORES == id_corredor {
-		close(pista)
-		chegada <- id_time
+	// fecha a pista para a equipe após o último corredor terminar de correr
+	if MAX_CORREDORES == id_corredor {
+		close(raia)
+		chegada <- id_time // notifica o canal da linha de chegada
 		return
 	} else {
-		go run(id_corredor+1, id_time, pista, chegada)
+		go run(id_corredor+1, id_time, raia, chegada) // lança o próximo corredor
 	}
 }
 
 func main() {
-	pista1 := make(chan corredor)
-	pista2 := make(chan corredor)
-	chegada := make(chan int)
+
+	// cada canal receberá as informações de uma equipe
+	raia1 := make(chan corredor)
+	raia2 := make(chan corredor)
+	chegada := make(chan int) // canal responsável por notificar se todas as esquipes cruzaram a chegada
 
 	go func() {
-		run(1, 1, pista1, chegada)
+		run(1, 1, raia1, chegada)
 	}()
 	go func() {
-		run(1, 2, pista2, chegada)
+		run(1, 2, raia2, chegada)
 	}()
 
 	tempo1 := time.Duration(0)
@@ -56,12 +57,12 @@ func main() {
 	remainingTeams := 2
 	for remainingTeams > 0 {
 		select {
-		case c, ok := <-pista1:
+		case c, ok := <-raia1:
 			if ok {
 				tempo1 = tempo1 + c.duracao
 				fmt.Println("\tTEMPO TOTAL:", tempo1)
 			}
-		case c, ok := <-pista2:
+		case c, ok := <-raia2:
 			if ok {
 				tempo2 = tempo2 + c.duracao
 				fmt.Println("\tTEMPO TOTAL:", tempo2)
@@ -79,6 +80,7 @@ func main() {
 
 	}
 
+	// calculando equipe que correu mais rápido
 	menorTempo = tempo1
 	vencedor := 1
 	if tempo1 > tempo2 {
@@ -87,6 +89,4 @@ func main() {
 	}
 
 	fmt.Println("\nEquipe", vencedor, "venceu com", menorTempo)
-	// fmt.Println("Tempo final percorrido 1:", tempo1)
-	// fmt.Println("Tempo final percorrido 2:", tempo2)
 }
