@@ -92,7 +92,7 @@ func correr(id_corredor, id_equipe int, raia, chegada chan Corredor) {
 // simular a largada, deixando o bastão pronto para que o primeiro
 // corredor possa pegá-lo e começar a correr
 func prepararBastao(raia chan Corredor) {
-	raia <- Corredor{tempo_acumulado_equipe: 0, tempo: 0}
+	raia <- Corredor{id: 0, tempo_acumulado_equipe: 0, tempo: 0}
 }
 
 func main() {
