@@ -3,27 +3,55 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
+	"strconv"
 	"time"
 )
 
-// estrutura para guardar as informações de um Corredor
+var MAX_CORREDORES = 4 // total de corredores por time
+var MAX_EQUIPES = 4    // total de times
+
+// estrutura para guardar as informações de um corredor ao
+// longo da corrida
 type Corredor struct {
-	tempo       time.Duration
-	tempo_total time.Duration
-	id          int
-	time        int
+	tempo                  time.Duration
+	tempo_acumulado_equipe time.Duration
+	id                     int
+	equipe                 int
 }
 
+// estrutura para ordenar os dados dos corredores pelo tempo total
 type PorTempo []Corredor
 
-func (a PorTempo) Len() int           { return len(a) }
-func (a PorTempo) Less(i, j int) bool { return a[i].tempo_total < a[j].tempo_total }
-func (a PorTempo) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a PorTempo) Len() int { return len(a) }
+func (a PorTempo) Less(i, j int) bool {
+	return a[i].tempo_acumulado_equipe < a[j].tempo_acumulado_equipe
+}
+func (a PorTempo) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 
-const MAX_CORREDORES = 4 // total de corredores por time
-const MAX_EQUIPES = 4    // total de times
+// seta a quantidade de corredores e equipes caso o usuário
+// tenha passado mais argumentos na hora da execução do programa
+func prepararEquipes(args []string) {
+	if len(args) > 0 {
+		equipes, err := strconv.Atoi(args[0])
+		if err == nil && equipes > 0 {
+			fmt.Printf("equipes=%d\n", equipes)
+			MAX_EQUIPES = equipes
+		}
+		if len(args) > 1 {
+			corredores, err := strconv.Atoi(args[1])
+			if err == nil && corredores > 0 {
+				fmt.Printf("corredores=%d\n", corredores)
+				MAX_CORREDORES = corredores
+			}
+		}
+	}
+}
 
+// função que simula as ações do corredor;
+// espera e recebe o bastão, corre e passa o bastão a diante caso a equipe ainda
+// não tenha lançado todos os corredores
 func correr(id_corredor, id_equipe int, raia, chegada chan Corredor) {
 	// espera o bastão chegar para começar a correr
 	ultimo_corredor := <-raia
@@ -36,8 +64,12 @@ func correr(id_corredor, id_equipe int, raia, chegada chan Corredor) {
 	// corre
 	time.Sleep(tempo)
 
-	tempo_total := tempo + ultimo_corredor.tempo_total
-	corredor_atual := Corredor{tempo: tempo, id: id_corredor, time: id_equipe, tempo_total: tempo_total}
+	tempo_total := tempo + ultimo_corredor.tempo_acumulado_equipe
+	corredor_atual := Corredor{
+		tempo:                  tempo,
+		id:                     id_corredor,
+		equipe:                 id_equipe,
+		tempo_acumulado_equipe: tempo_total}
 	fmt.Println("Corredor", id_corredor, "da equipe", id_equipe, "correu por", tempo, "\t TEMPO:", tempo_total)
 
 	// fecha a pista para a equipe após o último corredor terminar de correr
@@ -52,52 +84,55 @@ func correr(id_corredor, id_equipe int, raia, chegada chan Corredor) {
 	}
 }
 
-// simular a largada, deixando o bastão pronto para o primeiro
+// simular a largada, deixando o bastão pronto para que o primeiro
 // corredor possa pegá-lo e começar a correr
 func prepararBastao(raia chan Corredor) {
-	raia <- Corredor{tempo_total: 0, tempo: 0}
+	raia <- Corredor{tempo_acumulado_equipe: 0, tempo: 0}
 }
 
 func main() {
+	argsSemPrograma := os.Args[1:]
+	prepararEquipes(argsSemPrograma)
 
 	// cada canal será uma raia para os corredores de uma equipe
-	var raias [MAX_EQUIPES]chan Corredor
+	var raias []chan Corredor
 	for i := 0; i < MAX_EQUIPES; i++ {
-		raias[i] = make(chan Corredor)
+		raias = append(raias, make(chan Corredor))
 	}
 
 	// canal responsável por notificar a chegada das equipes
 	chegada := make(chan Corredor)
 
-	// preparando os batões para que as equipes	possam largar
+	// preparando os batões para que as equipes possam largar
 	for i := 0; i < MAX_EQUIPES; i++ {
 		go prepararBastao(raias[i])
 	}
 
 	// ====================== LARGADA ==========================
+	fmt.Println("\t==================LARGADA==================\t")
 
 	for i := 0; i < MAX_EQUIPES; i++ {
 		go correr(1, i, raias[i], chegada)
 	}
 
-	var stats_finais []Corredor
-	remainingTeams := MAX_EQUIPES
-	for remainingTeams > 0 {
-		t := <-chegada
-		stats_finais = append(stats_finais, t)
-		fmt.Println("Equipe", t.time, "\t==================CHEGADA==================\t", t.tempo_total)
-		remainingTeams = remainingTeams - 1
+	var resultados []Corredor
+	equipesRestantes := MAX_EQUIPES
+	for equipesRestantes > 0 {
+		corredor := <-chegada
+		resultados = append(resultados, corredor)
+		fmt.Println("\t==================CHEGADA==================\t", "Equipe", corredor.equipe, corredor.tempo_acumulado_equipe)
+		equipesRestantes = equipesRestantes - 1
 	}
 
 	// ====================== CHEGADA ==========================
 
 	// ordena tempos e equipes
-	sort.Sort(PorTempo(stats_finais))
+	sort.Sort(PorTempo(resultados))
 
 	// imprime os resultados finais
-	fmt.Print("\nEquipe ", stats_finais[0].time, ": ", stats_finais[0].tempo_total, "\tEQUIPE VENCEDORA")
+	fmt.Print("\nEquipe ", resultados[0].equipe, ": ", resultados[0].tempo_acumulado_equipe, "\tEQUIPE VENCEDORA")
 	for i := 1; i < MAX_EQUIPES; i++ {
-		fmt.Print("\nEquipe ", stats_finais[i].time, ": ", stats_finais[i].tempo_total)
+		fmt.Print("\nEquipe ", resultados[i].equipe, ": ", resultados[i].tempo_acumulado_equipe)
 	}
 	fmt.Println()
 
